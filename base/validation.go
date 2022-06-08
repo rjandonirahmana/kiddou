@@ -31,7 +31,7 @@ func NewRedisAuth(db *redis.Client) *RedisAuth {
 type AuthRedis interface {
 	GenerateTokenRedis(ctx context.Context, userID, email, role, name string) (string, error)
 	DeleteToken(ctx context.Context, email string) error
-	Authentication(ctx context.Context, token string) (*AuthToken, error)
+	Authentication(ctx context.Context, token string) (AuthToken, error)
 	RegenerateToken(ctx context.Context, email, name string) error
 }
 
@@ -116,20 +116,20 @@ func (r *RedisAuth) DeleteToken(ctx context.Context, email string) error {
 	}
 }
 
-func (r *RedisAuth) Authentication(ctx context.Context, token string) (*AuthToken, error) {
+func (r *RedisAuth) Authentication(ctx context.Context, token string) (res AuthToken, err error) {
 	email, err := r.db.Get(ctx, token).Result()
 	if err != nil {
-		return nil, err
+		return res, err
 	}
 
 	var auth AuthToken
 	err = r.db.HGetAll(ctx, email).Scan(&auth)
 
 	if err != nil {
-		return nil, err
+		return res, err
 	}
 
-	return &auth, nil
+	return auth, nil
 }
 
 func (r *RedisAuth) RegenerateToken(ctx context.Context, email, name string) error {

@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type Videos struct {
@@ -15,6 +16,14 @@ type Videos struct {
 	Subscribers  int
 }
 
+type Subscribers struct {
+	UserID           string
+	VideoID          int
+	TypeSubscription string
+	ExpiredAt        time.Time
+	Status           string
+}
+
 type InserVideosRequest struct {
 	CategoryID   int    `form:"category_id" validate:"required"`
 	Name         string `form:"name" validate:"required"`
@@ -24,5 +33,10 @@ type InserVideosRequest struct {
 
 type RepoVideos interface {
 	InsertVideos(ctx context.Context, tx *sql.Tx, video *Videos) error
-	GetByCategory(ctx context.Context, categoryID int) (res []*Videos, err error)
+	GetByCategory(ctx context.Context, categoryID int) (res []Videos, err error)
+	GetAllCategories(ctx context.Context) (res []Categories, err error)
+}
+
+type UsecaseVideos interface {
+	InsertVideos(ctx context.Context, videos []byte, input *InserVideosRequest) error
 }

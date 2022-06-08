@@ -43,3 +43,10 @@ func (r *userRepo) GetByEmail(ctx context.Context, email string) (res domain.Use
 	err = r.db.QueryRowContext(ctx, querry, email).Scan(&res.UserID, &res.Name, &res.Email, &res.Password, &res.Salt, &res.Avatar, &res.PhoneNumber, &res.CreatedAt, &res.UpdatedAt)
 	return
 }
+
+func (r *userRepo) IsUserAdmin(ctx context.Context, userID string) (admin domain.Admin, err error) {
+	querry := `SELECT id, user_id FROM admin WHERE user_id = $1`
+	err = r.db.QueryRowContext(ctx, querry, userID).Scan(&admin.ID, &admin.UserID)
+	return
+
+}

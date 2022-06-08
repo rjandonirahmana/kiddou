@@ -33,8 +33,9 @@ CREATE TABLE IF NOT EXISTS videos
     category_id           INT                         NOT NULL,
     name VARCHAR(50) not null,
     descriptions VARCHAR(225) not NULL,
+    subscribers INT NOT NULL,
     price VARCHAR(10) not null,
-    url_video           VARCHAR(50)                     NOT NULL,
+    url          VARCHAR(50)                     NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (category_id) REFERENCES categories (id)
 
@@ -54,3 +55,20 @@ CREATE TABLE IF NOT EXISTS subcriptions
 
 );
 
+
+INSERT INTO categories (id, name) VALUES
+    (1,'keluarga'),
+    (2,'sports'),
+    (3,'animasi'),
+    (4, 'thriller'),
+    (5, 'dokumentasi')
+    ;
+
+-- CREATE FUNCTION expire() RETURNS trigger
+--     LANGUAGE plpgsql
+--     AS $$
+-- BEGIN
+--   UPDATE subcriptions SET status = `expired` WHERE timestamp < NOW() - INTERVAL '1 minute';
+--   RETURN NEW;
+-- END;
+-- $$;

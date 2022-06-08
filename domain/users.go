@@ -18,6 +18,11 @@ type Users struct {
 	UpdatedAt   time.Time
 }
 
+type Admin struct {
+	ID     int
+	UserID string
+}
+
 type RegisterInput struct {
 	Email           string `form:"email" validate:"required,email"`
 	Password        string `form:"password" validate:"required,min=8,max=32,alphanum"`
@@ -32,9 +37,10 @@ type LoginInput struct {
 type RepositoryUser interface {
 	Insertuser(ctx context.Context, tx *sql.Tx, user *Users) error
 	GetByEmail(ctx context.Context, email string) (res Users, err error)
+	IsUserAdmin(ctx context.Context, userID string) (admin Admin, err error)
 }
 
 type UsecaseUser interface {
 	Register(ctx context.Context, input *RegisterInput) (string, error)
-	Login(ctx context.Context, email, password string) (*Users, error)
+	Login(ctx context.Context, email, password string) (string, error)
 }

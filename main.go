@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -58,13 +58,22 @@ func main() {
 
 	authentication := base.NewRedisAuth(redis)
 	repoUser := repo.NewUserRepo(db)
+	videoRepo := repo.NewRepositoryVideos(db)
+
+	usecaseVideo := usecase.NewUsecaseVideos(videoRepo, db)
 	usecaseUser := usecase.NewUsecaseUser(repoUser, "secretbangett", db, authentication)
 	handlerUser := handler.NewUserHandler(usecaseUser)
+	videohandler := handler.NewHandlerVideo(usecaseVideo)
 
-	fiber := fiber.New(fiber.Config{})
+	middleware := handler.NewMiddleware(authentication)
 
-	fiber.Post("/register", handlerUser.Register)
+	app := gin.Default()
 
-	log.Fatal(fiber.Listen(":8080"))
+	app.POST("/register", handlerUser.Register)
+	app.POST("/login", handlerUser.Login)
+
+	app.POST("/create/video", middleware.GetTokenFromHeaderBearer(videohandler.CreateVideosAdmin))
+
+	app.Run(":8282")
 
 }

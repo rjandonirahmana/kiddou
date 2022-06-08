@@ -1,5 +1,7 @@
 package base
 
+import "github.com/gin-gonic/gin"
+
 type Response struct {
 	Meta Meta        `json:"meta"`
 	Data interface{} `json:"data"`
@@ -17,7 +19,7 @@ type ResponseToken struct {
 	Token string      `json:"token"`
 }
 
-func APIResponse(message string, code int, status string, data interface{}) Response {
+func APIResponse(c *gin.Context, message string, code int, status string, data interface{}) {
 	meta := Meta{
 		Message: message,
 		Code:    code,
@@ -28,11 +30,10 @@ func APIResponse(message string, code int, status string, data interface{}) Resp
 		Meta: meta,
 		Data: data,
 	}
-
-	return NewRensponse
+	c.JSON(code, NewRensponse)
 }
 
-func ResponseAPIToken(message string, code int, status string, data interface{}, GetToken string) ResponseToken {
+func ResponseAPIToken(c *gin.Context, message string, code int, status string, data interface{}, GetToken string) {
 	meta := Meta{
 		Message: message,
 		Code:    code,
@@ -45,5 +46,5 @@ func ResponseAPIToken(message string, code int, status string, data interface{},
 		Token: GetToken,
 	}
 
-	return NewRensponse
+	c.JSON(code, NewRensponse)
 }

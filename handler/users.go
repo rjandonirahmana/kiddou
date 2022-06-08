@@ -4,8 +4,9 @@ import (
 	"kiddou/base"
 	"kiddou/domain"
 
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 type UserHandler struct {
@@ -16,28 +17,54 @@ func NewUserHandler(useecaseUser domain.UsecaseUser) *UserHandler {
 	return &UserHandler{usecaseUser: useecaseUser}
 }
 
-func (h *UserHandler) Register(c *fiber.Ctx) error {
+func (h *UserHandler) Register(c *gin.Context) {
 	var input domain.RegisterInput
 
-	err := c.BodyParser(&input)
+	err := c.MustBindWith(&input, binding.Form)
 	if err != nil {
-		res := base.APIResponse("failed to pass form json", 422, err.Error(), nil)
-		return c.Status(422).JSON(res)
+		base.APIResponse(c, "failed to pass form json", 422, err.Error(), nil)
+		return
 	}
 
 	err = validator.New().Struct(&input)
 	if err != nil {
-		res := base.APIResponse("failed to pass form json", 422, err.Error(), nil)
-		return c.Status(422).JSON(res)
+		base.APIResponse(c, "failed to pass form json", 422, err.Error(), nil)
+		return
 	}
 
-	token, err := h.usecaseUser.Register(c.Context(), &input)
+	token, err := h.usecaseUser.Register(c, &input)
 	if err != nil {
-		res := base.APIResponse("system error failed", 422, err.Error(), nil)
-		return c.Status(422).JSON(res)
+		base.APIResponse(c, "system error failed", 422, err.Error(), nil)
+		return
+
 	}
 
-	res := base.ResponseAPIToken("success create user", 200, "success", nil, token)
-	return c.Status(200).JSON(res)
+	base.ResponseAPIToken(c, "success create user", 200, "success", nil, token)
+	return
 
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var input domain.LoginInput
+
+	err := c.MustBindWith(&input, binding.Form)
+	if err != nil {
+		base.APIResponse(c, "failed to pass form json", 422, err.Error(), nil)
+		return
+	}
+
+	err = validator.New().Struct(&input)
+	if err != nil {
+		base.APIResponse(c, "failed to pass form json", 422, err.Error(), nil)
+		return
+	}
+
+	token, err := h.usecaseUser.Login(c, input.Email, input.Password)
+	if err != nil {
+		base.APIResponse(c, "failed to login", 422, err.Error(), nil)
+		return
+	}
+
+	base.ResponseAPIToken(c, "success login", 200, "success", nil, token)
+	return
 }

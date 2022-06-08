@@ -86,10 +86,10 @@ func (u *usecaseUser) Register(ctx context.Context, input *domain.RegisterInput)
 
 }
 
-func (u *usecaseUser) Login(ctx context.Context, email, password string) (*domain.Users, error) {
+func (u *usecaseUser) Login(ctx context.Context, email, password string) (string, error) {
 	user, err := u.repoUser.GetByEmail(ctx, email)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	password += user.Salt
 	h := sha256.New()
@@ -97,8 +97,22 @@ func (u *usecaseUser) Login(ctx context.Context, email, password string) (*domai
 	hashpassword := fmt.Sprintf("%x", h.Sum([]byte(u.secret)))
 
 	if hashpassword != user.Password {
-		return nil, errors.New("wrong password")
+		return "", errors.New("wrong password")
 	}
 
-	return &user, nil
+	admin, err := u.repoUser.IsUserAdmin(ctx, user.UserID)
+	if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+
+	role := "user"
+	if admin.ID > 0 {
+		role = "admin"
+	}
+	token, err := u.authRedis.GenerateTokenRedis(ctx, user.UserID, user.Email, role, user.Name)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
