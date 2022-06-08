@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+    postgresdb:
+        image: postgres:latest
+        container_name: postgres_container
+        environment:
+        - POSTGRES_USER=rjandoni
+        - POSTGRES_PASSWORD=12345
+        - POSTGRES_DB=kiddou
+        - DATABASE_HOST=postgres
+        ports:
+        - '5444:5432'
+        networks:
+        - kiddou
+    redisdb:
+        container_name: redisdb
+        image: "redis:latest"
+        hostname: redis
+        ports:
+          - "6378:6379"   
+        command: redis-server --save 20 1 --loglevel warning --requirepass 12345 
+    
+
+
+networks:
+  kiddou:
+    driver: bridge
