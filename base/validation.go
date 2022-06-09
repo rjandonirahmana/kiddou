@@ -67,6 +67,7 @@ func (a *RedisAuth) GenerateTokenRedis(ctx context.Context, userID, email, role,
 		}
 		pipe := a.db.TxPipeline()
 		pipe.HSet(ctx, email, "token", token)
+		pipe.HSet(ctx, email, "user_id", userID)
 		pipe.HSet(ctx, email, "role", role)
 		pipe.HSet(ctx, email, "expired", expired.Format(time.RFC3339))
 		pipe.Set(ctx, token, email, time.Hour*24)

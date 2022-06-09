@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"kiddou/base"
+	"kiddou/cron"
 	"kiddou/handler"
 	"kiddou/repo"
 	"kiddou/usecase"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -59,13 +61,27 @@ func main() {
 	authentication := base.NewRedisAuth(redis)
 	repoUser := repo.NewUserRepo(db)
 	videoRepo := repo.NewRepositoryVideos(db)
+	repoSubcribe := repo.NewRepositorySSub(db)
 
-	usecaseVideo := usecase.NewUsecaseVideos(videoRepo, db)
+	usecaseVideo := usecase.NewUsecaseVideos(videoRepo, db, repoSubcribe)
 	usecaseUser := usecase.NewUsecaseUser(repoUser, "secretbangett", db, authentication)
 	handlerUser := handler.NewUserHandler(usecaseUser)
 	videohandler := handler.NewHandlerVideo(usecaseVideo)
 
 	middleware := handler.NewMiddleware(authentication)
+
+	go func() {
+
+		for {
+			err := cron.TaskMonitoring(db, repoSubcribe, videoRepo)
+			if err != nil {
+				panic(err)
+			}
+
+			time.Sleep(time.Minute * 10)
+			log.Println("sleep for 10 minutes to loop again")
+		}
+	}()
 
 	app := gin.Default()
 
@@ -73,7 +89,9 @@ func main() {
 	app.POST("/login", handlerUser.Login)
 
 	app.POST("/create/video", middleware.GetTokenFromHeaderBearer(videohandler.CreateVideosAdmin))
-
+	app.POST("/subscription/subscribe", middleware.GetTokenFromHeaderBearer(videohandler.SubscribersVideo))
+	app.GET("/subscription/status/:id", middleware.GetTokenFromHeaderBearer(videohandler.StatusSUbscribe))
+	app.POST("/subscription/renew", middleware.GetTokenFromHeaderBearer(videohandler.RenewSubscribe))
 	app.Run(":8282")
 
 }

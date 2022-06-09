@@ -8,6 +8,9 @@ services:
         - POSTGRES_PASSWORD=12345
         - POSTGRES_DB=kiddou
         - DATABASE_HOST=postgres
+        volumes:
+        - ./postgresql.conf:/etc/postgresql.conf
+        - /home/rjandoni/Desktop/volumedocker:/var/lib/postgresql/data2
         ports:
         - '5444:5432'
         networks:
@@ -19,6 +22,8 @@ services:
         ports:
           - "6378:6379"   
         command: redis-server --save 20 1 --loglevel warning --requirepass 12345 
+        networks:
+        - kiddou
     
 
 

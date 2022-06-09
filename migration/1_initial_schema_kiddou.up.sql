@@ -42,20 +42,6 @@ CREATE TABLE IF NOT EXISTS videos
 
 );
 
-CREATE TABLE IF NOT EXISTS subcriptions
-(
-    id           VARCHAR(50)                     NOT NULL,
-    user_id      VARCHAR(50)                     NOT NULL,
-    video_id     INT                         NOT NULL,
-    type_subscription   VARCHAR(20) NOT NULL,
-    expired_at TIMESTAMP WITH TIME ZONE    NOT NULL,
-    status      VARCHAR(10) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (user_id),
-    FOREIGN KEY (video_id) REFERENCES videos (id)
-
-);
-
-
 INSERT INTO categories (id, name) VALUES
     (1,'keluarga'),
     (2,'sports'),
@@ -64,11 +50,23 @@ INSERT INTO categories (id, name) VALUES
     (5, 'dokumentasi')
     ;
 
--- CREATE FUNCTION expire() RETURNS trigger
---     LANGUAGE plpgsql
---     AS $$
--- BEGIN
---   UPDATE subcriptions SET status = `expired` WHERE timestamp < NOW() - INTERVAL '1 minute';
---   RETURN NEW;
--- END;
--- $$;
+INSERT INTO videos (category_id, name, descriptions, price, url, subscribers) VALUES 
+    (1, 'cars', 'mobil mobilan', '10000', 'cdn/cdn/cars.mp4', 0),
+    (2, 'play your ball', 'permainan bola', '10000', 'cdn/cdn/playyourball.mp4', 0),
+    (5, 'dokument', 'dokumentasi', '1000', 'cdn/cdn/dokumentasi.mp4', 0)
+    ;
+CREATE TABLE IF NOT EXISTS subcriptions
+(
+    id           serial                     NOT NULL,
+    user_id      VARCHAR(50)                     NOT NULL,
+    video_id     INT                         NOT NULL,
+    type_subscription   VARCHAR(20) NOT NULL,
+    subscribe_at TIMESTAMP WITH TIME ZONE    NOT NULL,
+    expired_at TIMESTAMP WITH TIME ZONE    NOT NULL,
+    status      VARCHAR(10) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (video_id) REFERENCES videos (id)
+
+);
+
+
