@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"kiddou/base"
 	"kiddou/domain"
-	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -21,7 +21,7 @@ func NewHandlerVideo(usecaseVideo domain.UsecaseVideos) *HandlerVideos {
 
 func (h *HandlerVideos) CreateVideosAdmin(c *gin.Context) {
 	user := c.MustGet("user").(base.AuthToken)
-	log.Println(user)
+
 	if user.Role != "admin" {
 		base.APIResponse(c, "you are not admin", 422, "unauthorized admin", nil)
 		return
@@ -72,4 +72,71 @@ func (h *HandlerVideos) CreateVideosAdmin(c *gin.Context) {
 	base.APIResponse(c, "success", 200, "success", nil)
 	return
 
+}
+
+func (h *HandlerVideos) SubscribersVideo(c *gin.Context) {
+	user := c.MustGet("user").(base.AuthToken)
+
+	videoID := c.Request.FormValue("video_id")
+	vidInt, err := strconv.Atoi(videoID)
+	if err != nil {
+		base.APIResponse(c, "video_id only accept integer", 403, err.Error(), nil)
+		return
+
+	}
+
+	err = h.useCaseVideo.SubscribtionVideo(c, user.UserID, vidInt)
+	if err != nil {
+		base.APIResponse(c, "error system", 500, err.Error(), nil)
+		return
+
+	}
+
+	base.APIResponse(c, "success to subscribe", 200, "success", nil)
+	return
+
+}
+
+func (h *HandlerVideos) StatusSUbscribe(c *gin.Context) {
+	user := c.MustGet("user").(base.AuthToken)
+
+	videoID := c.Param("id")
+	vidInt, err := strconv.Atoi(videoID)
+	if err != nil {
+		base.APIResponse(c, "video_id only accept integer", 403, err.Error(), nil)
+		return
+
+	}
+
+	res, err := h.useCaseVideo.SubsribesStatus(c, user.UserID, vidInt)
+	if err != nil {
+		base.APIResponse(c, "error system", 500, err.Error(), nil)
+		return
+
+	}
+
+	base.APIResponse(c, "success to subscribe", 200, "success", res)
+	return
+}
+
+func (h *HandlerVideos) RenewSubscribe(c *gin.Context) {
+	user := c.MustGet("user").(base.AuthToken)
+
+	videoID := c.Request.FormValue("video_id")
+	vidInt, err := strconv.Atoi(videoID)
+	if err != nil {
+		base.APIResponse(c, "video_id only accept integer", 403, err.Error(), nil)
+		return
+
+	}
+
+	err = h.useCaseVideo.SubscribtionVideo(c, user.UserID, vidInt)
+	if err != nil {
+		base.APIResponse(c, "error system", 500, err.Error(), nil)
+		return
+
+	}
+
+	base.APIResponse(c, "success to subscribe", 200, "success", nil)
+	return
 }
