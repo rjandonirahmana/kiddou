@@ -16,6 +16,9 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
+	"golang.org/x/oauth2/google"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -53,10 +56,27 @@ func main() {
 		log.Println(err)
 	}
 
+	configGoogle := &oauth2.Config{
+		ClientID:     "1080827334930-bc6b9e6psejpuds8sk483fq0l8eetihi.apps.googleusercontent.com",
+		ClientSecret: "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",
+		Endpoint:     google.Endpoint,
+		RedirectURL:  "http://localhost:8484/callback-google",
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+	}
+
+	configGithub := &oauth2.Config{
+		ClientID:     "eb6ef5373a783a802e95",
+		ClientSecret: "9e6f30aa83ae2034e62b690c4f7399b75cc01f4b",
+		Endpoint:     github.Endpoint,
+		RedirectURL:  "http://localhost:8484/callback-github",
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+	}
+
 	redis, err := base.RedisConnection("", "12345", 3)
 	if err != nil {
 		panic(err)
 	}
+	defer redis.Close()
 
 	authentication := base.NewRedisAuth(redis)
 	repoUser := repo.NewUserRepo(db)
@@ -68,6 +88,7 @@ func main() {
 	handlerUser := handler.NewUserHandler(usecaseUser)
 	videohandler := handler.NewHandlerVideo(usecaseVideo)
 
+	LoginSSO := handler.NewLoginSSO(configGoogle, configGithub, usecaseUser)
 	middleware := handler.NewMiddleware(authentication)
 
 	go func() {
@@ -84,6 +105,7 @@ func main() {
 	}()
 
 	app := gin.Default()
+	app.LoadHTMLFiles("template")
 
 	app.POST("/register", handlerUser.Register)
 	app.POST("/login", handlerUser.Login)
@@ -92,6 +114,9 @@ func main() {
 	app.POST("/subscription/subscribe", middleware.GetTokenFromHeaderBearer(videohandler.SubscribersVideo))
 	app.GET("/subscription/status/:id", middleware.GetTokenFromHeaderBearer(videohandler.StatusSUbscribe))
 	app.POST("/subscription/renew", middleware.GetTokenFromHeaderBearer(videohandler.RenewSubscribe))
-	app.Run(":8282")
+	app.GET("/api/v1/home", LoginSSO.HomeLogin)
+	app.GET("/login-google", LoginSSO.LoginGoogle)
+	app.GET("/callback-google", LoginSSO.CallbackGoogleLogin)
+	app.Run(":8484")
 
 }

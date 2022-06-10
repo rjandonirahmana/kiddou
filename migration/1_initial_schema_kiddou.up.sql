@@ -12,13 +12,6 @@ CREATE TABLE IF NOT EXISTS users
     PRIMARY KEY (user_id)
 );
 
-CREATE TABLE IF NOT EXISTS admin
-(
-    id           SERIAL                      NOT NULL,
-    user_id VARCHAR(50) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (user_id)
-);
-
 CREATE TABLE IF NOT EXISTS categories
 (
     id                  serial                     NOT NULL,
@@ -27,20 +20,59 @@ CREATE TABLE IF NOT EXISTS categories
 
 );
 
+
+CREATE TABLE IF NOT EXISTS sosial_media 
+(   
+  id            Serial                       NOT NULL,
+  user_id       VARCHAR(50)                  NOT NULL,
+  google_id     VARCHAR(70)                  NULL,
+  facebook_id   VARCHAR(70)                  NULL,
+  github_id   VARCHAR(70)                  NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
 CREATE TABLE IF NOT EXISTS videos
 (
-    id                  serial                     NOT NULL,
-    category_id           INT                         NOT NULL,
-    name VARCHAR(50) not null,
-    descriptions VARCHAR(225) not NULL,
-    subscribers INT NOT NULL,
-    price VARCHAR(10) not null,
-    url          VARCHAR(50)                     NOT NULL,
+    id                      serial                          NOT NULL,
+    category_id             INT                             NOT NULL,
+    name                    VARCHAR(50)                     not null,
+    descriptions            VARCHAR(225)                    not NULL,
+    subscribers             INT                             NOT NULL,
+    price                   VARCHAR(10)                     not null,
+    url                     VARCHAR(50)                     NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (category_id) REFERENCES categories (id)
 
 
 );
+
+CREATE TABLE IF NOT EXISTS subcriptions
+(
+    id                  serial                     NOT NULL,
+    user_id             VARCHAR(50)                NOT NULL,
+    video_id            INT                        NOT NULL,
+    type_subscription   VARCHAR(20) NOT NULL,
+    subscribe_at        TIMESTAMP WITH TIME ZONE    NOT NULL,
+    expired_at          TIMESTAMP WITH TIME ZONE    NOT NULL,
+    status              VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (video_id) REFERENCES videos (id)
+
+);
+
+ 
+
+CREATE TABLE IF NOT EXISTS admin
+(
+    id           SERIAL                      NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+
+
+
 
 INSERT INTO categories (id, name) VALUES
     (1,'keluarga'),
@@ -55,18 +87,4 @@ INSERT INTO videos (category_id, name, descriptions, price, url, subscribers) VA
     (2, 'play your ball', 'permainan bola', '10000', 'cdn/cdn/playyourball.mp4', 0),
     (5, 'dokument', 'dokumentasi', '1000', 'cdn/cdn/dokumentasi.mp4', 0)
     ;
-CREATE TABLE IF NOT EXISTS subcriptions
-(
-    id           serial                     NOT NULL,
-    user_id      VARCHAR(50)                     NOT NULL,
-    video_id     INT                         NOT NULL,
-    type_subscription   VARCHAR(20) NOT NULL,
-    subscribe_at TIMESTAMP WITH TIME ZONE    NOT NULL,
-    expired_at TIMESTAMP WITH TIME ZONE    NOT NULL,
-    status      VARCHAR(10) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (user_id),
-    FOREIGN KEY (video_id) REFERENCES videos (id)
-
-);
-
 

@@ -116,3 +116,80 @@ func (u *usecaseUser) Login(ctx context.Context, email, password string) (string
 
 	return token, nil
 }
+
+func (u *usecaseUser) LoginGoogle(ctx context.Context, users *domain.Users, googleID string) (token string, err error) {
+	sosmed, err := u.repoUser.GetSosmedID(ctx, googleID, "google")
+	if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+	if sosmed.ID == 0 {
+		user, err := u.repoUser.GetByEmail(ctx, users.Email)
+		if err != nil && err != sql.ErrNoRows {
+			return "", err
+		}
+		if user.Email != "" {
+			return "", errors.New("you are login using another type of login")
+		}
+		salt, err := RandStringBytes(10)
+		if err != nil {
+			return "", err
+		}
+
+		tx, err := u.db.Begin()
+		if err != nil {
+			return "", err
+		}
+
+		users.UserID = base.GenerateUserID()
+		users.Salt = salt
+		users.CreatedAt = time.Now()
+		users.UpdatedAt = time.Now()
+		users.Password = "google"
+		users.Name = strings.Split(users.Email, "@")[0]
+		err = u.repoUser.Insertuser(ctx, tx, users)
+		if err != nil {
+			tx.Rollback()
+			return "", err
+		}
+
+		sosmed.UserID = users.UserID
+		sosmed.GoogleID = sql.NullString{String: googleID, Valid: true}
+		err = u.repoUser.InsertSosmed(ctx, tx, &sosmed)
+		if err != nil {
+			tx.Rollback()
+			return "", err
+		}
+
+		token, err := u.authRedis.GenerateTokenRedis(ctx, users.UserID, users.Email, "user", users.Name)
+		if err != nil {
+			return "", err
+		}
+
+		tx.Commit()
+		return token, nil
+
+	} else {
+		user, err := u.repoUser.GetByUserID(ctx, sosmed.UserID)
+		if err != nil {
+			return "", err
+		}
+
+		admin, err := u.repoUser.IsUserAdmin(ctx, user.UserID)
+		if err != nil && err != sql.ErrNoRows {
+			return "", err
+		}
+
+		role := "user"
+		if admin.ID > 0 {
+			role = "admin"
+		}
+
+		token, err := u.authRedis.GenerateTokenRedis(ctx, user.UserID, user.Email, role, user.Name)
+		if err != nil {
+			return "", err
+		}
+
+		return token, nil
+
+	}
+}
