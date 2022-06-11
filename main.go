@@ -43,6 +43,7 @@ func main() {
 				ver := int(version) - 1
 				mig.Force(ver)
 				log.Println(err)
+				panic(err)
 
 			} else {
 				log.Println("Migrate database success")

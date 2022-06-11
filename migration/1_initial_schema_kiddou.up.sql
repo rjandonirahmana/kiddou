@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS sosial_media
   user_id       VARCHAR(50)                  NOT NULL,
   google_id     VARCHAR(70)                  NULL,
   facebook_id   VARCHAR(70)                  NULL,
-  github_id   VARCHAR(70)                  NULL,
+  github_id     VARCHAR(70)                  NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (user_id) REFERENCES users (id)
+  FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS videos
@@ -52,10 +52,10 @@ CREATE TABLE IF NOT EXISTS subcriptions
     id                  serial                     NOT NULL,
     user_id             VARCHAR(50)                NOT NULL,
     video_id            INT                        NOT NULL,
-    type_subscription   VARCHAR(20) NOT NULL,
-    subscribe_at        TIMESTAMP WITH TIME ZONE    NOT NULL,
-    expired_at          TIMESTAMP WITH TIME ZONE    NOT NULL,
-    status              VARCHAR(10) NOT NULL,
+    type_subscription   VARCHAR(20)                NOT NULL,
+    subscribe_at        TIMESTAMP WITH TIME ZONE   NOT NULL,
+    expired_at          TIMESTAMP WITH TIME ZONE   NOT NULL,
+    status              VARCHAR(10)                NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (video_id) REFERENCES videos (id)
