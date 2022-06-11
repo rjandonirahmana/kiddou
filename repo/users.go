@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"kiddou/domain"
+	"log"
 )
 
 type userRepo struct {
@@ -67,10 +68,12 @@ func (r *userRepo) GetSosmedID(ctx context.Context, sosmedID string, sosmed stri
 	} else {
 		queeryWHERE = "WHERE facebook_id = $1"
 	}
+
 	querry := `SELECT id, user_id, google_id, facebook_id, github_id FROM sosial_media `
 	querry += queeryWHERE
+	log.Println(querry)
 
-	err = r.db.QueryRowContext(ctx, querry, sosmed).Scan(&res.ID, &res.UserID, &res.GoogleID, &res.FacebookID, &res.GithubID)
+	err = r.db.QueryRowContext(ctx, querry, sosmedID).Scan(&res.ID, &res.UserID, &res.GoogleID, &res.FacebookID, &res.GithubID)
 	return
 }
 

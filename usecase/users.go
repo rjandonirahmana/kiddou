@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"kiddou/base"
 	"kiddou/domain"
+	"log"
 	"strings"
 	"time"
 )
@@ -122,6 +123,8 @@ func (u *usecaseUser) LoginGoogle(ctx context.Context, users *domain.Users, goog
 	if err != nil && err != sql.ErrNoRows {
 		return "", err
 	}
+	log.Println(googleID)
+	log.Println(sosmed.ID)
 	if sosmed.ID == 0 {
 		user, err := u.repoUser.GetByEmail(ctx, users.Email)
 		if err != nil && err != sql.ErrNoRows {
