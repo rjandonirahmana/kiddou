@@ -167,3 +167,26 @@ func (u *usecaseVideos) SubsribesStatus(ctx context.Context, userID string, vide
 	return
 
 }
+
+func (u *usecaseVideos) GetByCategory(ctx context.Context, categoryID int) (res []domain.Videos, err error) {
+	availableCategories, err := u.repoVides.GetAllCategories(ctx)
+	if err != nil {
+		return res, err
+	}
+	found := false
+	for _, v := range availableCategories {
+		if v.ID == categoryID {
+			found = true
+		}
+	}
+	if !found {
+		return res, errors.New("category not found")
+	}
+
+	res, err = u.repoVides.GetByCategory(ctx, categoryID)
+	if err != nil {
+		return res, err
+	}
+	return
+
+}

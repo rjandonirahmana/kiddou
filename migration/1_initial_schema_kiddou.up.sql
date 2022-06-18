@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    user_id           VARCHAR(50)                     NOT NULL,
+    user_id      VARCHAR(50)                     NOT NULL,
     name         VARCHAR(50)                 NOT NULL CHECK ( name <> '' ),
     email        VARCHAR(64) UNIQUE          NOT NULL CHECK ( email <> '' ),
     password     VARCHAR(250)                NOT NULL CHECK ( octet_length(password) <> 0 ),
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS categories
 (
     id                  serial                     NOT NULL,
-    name VARCHAR(20) NOT NULL,
+    name                VARCHAR(20)                NOT NULL,
     PRIMARY KEY (id)
 
 );
@@ -85,6 +85,12 @@ INSERT INTO categories (id, name) VALUES
 INSERT INTO videos (category_id, name, descriptions, price, url, subscribers) VALUES 
     (1, 'cars', 'mobil mobilan', '10000', 'cdn/cdn/cars.mp4', 0),
     (2, 'play your ball', 'permainan bola', '10000', 'cdn/cdn/playyourball.mp4', 0),
-    (5, 'dokument', 'dokumentasi', '1000', 'cdn/cdn/dokumentasi.mp4', 0)
+    (5, 'dokument1', 'dokumentasi', '1000', 'cdn/cdn/dokumentasi.mp4', 0),
+    (5, 'dokument2', 'dokumentasi2', '1000', 'cdn/cdn/dokumentasi.mp4', 0),
+    (5, 'dokument3', 'dokumentasi3', '1000', 'cdn/cdn/dokumentasi.mp4', 0),
+    (1, 'cars2', 'mobil mobilan', '10000', 'cdn/cdn/cars.mp4', 0),
+    (2, 'play your ball2', 'permainan bola', '10000', 'cdn/cdn/playyourball.mp4', 0),
+    (1, 'cars3', 'mobil mobilan', '10000', 'cdn/cdn/cars.mp4', 0),
+    (2, 'play your ball3', 'permainan bola', '10000', 'cdn/cdn/playyourball.mp4', 0)
     ;
 

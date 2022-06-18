@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"kiddou/base"
 	"kiddou/cron"
+	grpcVideo "kiddou/grpc/videos"
 	"kiddou/handler"
 	"kiddou/repo"
 	"kiddou/usecase"
 	"log"
+	"net"
 	"os"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/grpc"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -102,6 +105,20 @@ func main() {
 
 			time.Sleep(time.Minute * 10)
 			log.Println("sleep for 10 minutes to loop again")
+		}
+	}()
+
+	go func() {
+		listen, err := net.Listen("tcp", ":56767")
+		if err != nil {
+			panic(err)
+		}
+
+		grpcServer := grpc.NewServer()
+		grpcVideo.RegisterVideosStreanServer(grpcServer, handler.NewGrpcVideos(usecaseVideo))
+
+		if err := grpcServer.Serve(listen); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
 		}
 	}()
 
