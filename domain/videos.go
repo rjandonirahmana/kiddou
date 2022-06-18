@@ -53,6 +53,7 @@ type UsecaseVideos interface {
 	InsertVideos(ctx context.Context, videos []byte, input *InserVideosRequest) error
 	SubscribtionVideo(ctx context.Context, userID string, videoID int) error
 	SubsribesStatus(ctx context.Context, userID string, videoID int) (res SubsriptionStatusDTO, err error)
+	GetByCategory(ctx context.Context, categoryID int) (res []Videos, err error)
 }
 
 type SubscribersRepo interface {
